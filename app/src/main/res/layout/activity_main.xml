@@ -161,7 +161,7 @@
             <ListView
                 android:id="@+id/suggestionListView"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="100dp"
                 android:layout_weight="1"
                 android:background="#FFFFFF" />
         </LinearLayout>

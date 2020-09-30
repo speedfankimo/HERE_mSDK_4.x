@@ -319,6 +319,8 @@ public class MainActivity extends AppCompatActivity {
                     linearLayout.addView(textView);
 
                     mapView.pinView(linearLayout, result.getGeoCoordinates());
+                    //move the camera to the result location
+                    mapView.getCamera().lookAt(result.getGeoCoordinates());
                 }
             }
         });
