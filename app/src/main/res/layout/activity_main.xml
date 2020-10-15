@@ -109,48 +109,48 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <Button
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_weight="1"
+            android:backgroundTint="#A4C3FF"
+            android:onClick="searchPlaces"
+            android:text="Places" />
 
+        <Button
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#DB5F5F"
+            android:onClick="searchAddress"
+            android:text="Address" />
 
-            <Button
-                style="@android:style/Widget.Button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="#A4C3FF"
-                android:onClick="searchPlaces"
-                android:text="Places" />
+        <Button
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#DB5F5F"
+            android:onClick="searchRevAddress"
+            android:text="RevAddress" />
 
-            <Button
-                style="@android:style/Widget.Button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="#DB5F5F"
-                android:onClick="searchAddress"
-                android:text="Address" />
-
-            <Button
-                style="@android:style/Widget.Button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="#DB5F5F"
-                android:onClick="searchRevAddress"
-                android:text="RevAddress" />
-
-            <Button
-                style="@android:style/Widget.Button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="#009688"
-                android:onClick="searchAutoSuggest"
-                android:text="Suggest" />
-        </LinearLayout>
+        <Button
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#009688"
+            android:onClick="searchAutoSuggest"
+            android:text="Suggest" />
+    </LinearLayout>
 
         <LinearLayout
             app:layout_constraintTop_toTopOf="parent"
@@ -161,7 +161,55 @@
             <ListView
                 android:id="@+id/suggestionListView"
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="20dp"
+                android:layout_weight="1"
+                android:background="#FFFFFF" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#E4EC12"
+            android:onClick="calculateRoute"
+            android:text="CarRouting" />
+
+            <Button
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#03A9F4"
+                android:onClick="calculateRoutePedestrian"
+                android:text="PedRouting" />
+
+            <Button
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#F09688"
+                android:onClick="clearMap"
+                android:text="Clear" />
+        </LinearLayout>
+
+        <LinearLayout
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/routeTextView"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
                 android:layout_weight="1"
                 android:background="#FFFFFF" />
         </LinearLayout>

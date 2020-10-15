@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import com.here.sdk.core.LanguageCode;
 import com.here.sdk.core.Metadata;
 import com.here.sdk.core.Point2D;
 import com.here.sdk.core.errors.InstantiationErrorException;
+import com.here.sdk.gestures.GestureState;
 import com.here.sdk.gestures.TapListener;
 import com.here.sdk.mapview.MapCamera;
 import com.here.sdk.mapview.MapError;
@@ -41,6 +44,18 @@ import com.here.sdk.mapview.MapScheme;
 import com.here.sdk.mapview.MapView;
 import com.here.sdk.mapview.MapViewBase;
 import com.here.sdk.mapview.PickMapItemsResult;
+import com.here.sdk.routing.AvoidanceOptions;
+import com.here.sdk.routing.CalculateRouteCallback;
+import com.here.sdk.routing.CarOptions;
+import com.here.sdk.routing.HazardousGood;
+import com.here.sdk.routing.OptimizationMode;
+import com.here.sdk.routing.PedestrianOptions;
+import com.here.sdk.routing.Route;
+import com.here.sdk.routing.RouteOptions;
+import com.here.sdk.routing.RouteTextOptions;
+import com.here.sdk.routing.RoutingEngine;
+import com.here.sdk.routing.RoutingError;
+import com.here.sdk.routing.Waypoint;
 import com.here.sdk.search.AddressQuery;
 import com.here.sdk.search.CategoryQuery;
 import com.here.sdk.search.Place;
@@ -73,11 +88,22 @@ public class MainActivity extends AppCompatActivity {
     private double bearingInDegrees;
     private double tiltInDegrees;
     private MapCamera.OrientationUpdate cameraOrientation;
+    private MapCamera.OrientationUpdate routecameraOrientation;
     private double distanceInMeters;
 
     private SearchEngine searchEngine;
 
+    // For routing service
+    private Context context;
+    private TextView routeTextView;
+    private RoutingEngine routingEngine;
+    //long press to generate the waypoint list and marker
+    private List<Waypoint> waypoints = new ArrayList<>();
+    private List<MapMarker> waypointMarkers = new ArrayList<>();
+    private List<MapPolyline> routeMapPolylines = new ArrayList<>();
 
+
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,17 +111,27 @@ public class MainActivity extends AppCompatActivity {
 
         //Get aMapView instance from the layout
         mapView =findViewById(R.id.mapview);
+        routeTextView = findViewById(R.id.routeTextView);
         mapView.onCreate(savedInstanceState);
+
+        context = getApplicationContext();
 
 //        //ASK FOR PERMISSION！
 //        handleAndroidPermissions();
 
         loadMapScene();
+        setLongPressGestureHandler();
 
         try{
             searchEngine=new SearchEngine();
         }catch (InstantiationErrorException e){
             throw new RuntimeException("oh something went wrong");
+        }
+
+        try{
+            routingEngine =new RoutingEngine();
+        }catch (InstantiationErrorException e){
+            throw new RuntimeException("oh something wrong");
         }
     }
 
@@ -104,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     private void loadMapScene() {
-        //Load a schene from the HERE SDK to render the map with a map schene
+        //Load a schene from the HERE SDK to render the map with a map scheme
         mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
@@ -211,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void addMarker(View view){
         //Create MapImage
-        MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.poi);
+        MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.waypoint);
         //Create Anchor (generally the anchor is placed on the middle of the image rather on buttom of image)
         Anchor2D anchor2D = new Anchor2D(0.5f,1.1f);
 
@@ -274,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
         mapView.getGestures().setTapListener(new TapListener() {
             @Override
             public void onTap(Point2D touchPoint) {
+                //v:2 means far away touchPoint 2 pixel
                 mapView.pickMapItems(touchPoint, 2, new MapViewBase.PickMapItemsCallback() {
                     @Override
                     public void onPickMapItems(PickMapItemsResult pickMapItemsResult) {
@@ -281,10 +318,10 @@ public class MainActivity extends AppCompatActivity {
                         MapMarker pickedMarker = mapMarkerList.get(0);
                         Metadata meta = pickedMarker.getMetadata();
                         if (meta == null){
-                            Toast toast = Toast.makeText(getApplicationContext(), "No Stegosaurus here :( ",Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getApplicationContext(), "No I am not here :( ",Toast.LENGTH_SHORT);
                             toast.show();
                         }else if (meta.getString("dino").equals("stegosaurus")){
-                            Toast toast = Toast.makeText(getApplicationContext(), "you found a hidden Stegosaurus",Toast.LENGTH_SHORT);
+                            Toast toast = Toast.makeText(getApplicationContext(), "you found me",Toast.LENGTH_SHORT);
                             toast.show();
                             //remove object
                             mapView.getMapScene().removeMapMarker(pickedMarker);
@@ -364,7 +401,7 @@ public class MainActivity extends AppCompatActivity {
         //Fetch the search text from input bar and search by center of screen
         EditText editText = findViewById(R.id.searchText);
         AddressQuery addressQuery = new AddressQuery(editText.getText().toString(), getScreenCenter());
-        //new GeoCoordinates(25.077746,121.386128) or
+        //new GeoCoordinates(25.077746,121.386128) or function -> getScreenCenter()
         searchEngine.search(getScreenCenter(), searchOptions, new SearchCallback() {
             @Override
             public void onSearchCompleted(@Nullable SearchError searchError, @Nullable List<Place> list) {
@@ -421,6 +458,138 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void calculateRoute(View view) {
+
+        RouteOptions routeOptions = new RouteOptions();
+        // how many route return
+        routeOptions.alternatives =3 ;
+        routeOptions.optimizationMode = OptimizationMode.FASTEST;
+
+        CarOptions options = new CarOptions(routeOptions, new RouteTextOptions(), new AvoidanceOptions());
+
+        routingEngine.calculateRoute(
+                waypoints,
+                options,  // or use "new CarOptions() as car default
+                new CalculateRouteCallback() {
+                    @Override
+                    public void onRouteCalculated(@Nullable RoutingError routingError, @Nullable List<Route> routes) {
+                        if(routingError == null) {
+                            // obtain the first route via get(0) instead of the alternative route
+                            Route route = routes.get(0);
+                            drawRoute(route);
+                        }else {
+                            // check what's the error
+                        }
+                    }
+                }
+        );
+    }
+
+    public void calculateRoutePedestrian(View view) {
+        routingEngine.calculateRoute(
+                waypoints,
+                // default car routing
+                new PedestrianOptions(),
+                new CalculateRouteCallback() {
+                    @Override
+                    public void onRouteCalculated(@Nullable RoutingError routingError, @Nullable List<Route> routes) {
+                        if(routingError == null) {
+                            // obtain the first route via get(0) instead of the alternative route
+                            Route route = routes.get(0);
+                            drawRoutePedestrian(route);
+                        }else {
+                            // check what's the error
+                        }
+                    }
+                }
+        );
+    }
+
+    private void drawRoute(Route route) {
+        GeoPolyline routeGeoPolyline;
+
+        try {
+            routeGeoPolyline = new GeoPolyline(route.getPolyline());
+        }catch (InstantiationErrorException e) {
+            // need to return because of the route must have more than two points
+            return ;
+        }
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 20, new Color((short) 0x00,(short) 0x90,(short) 0x8A,(short) 0xA0));
+
+        mapView.getMapScene().addMapPolyline(routeMapPolyline);
+
+        // add routeMapPolyline to routeMapPolylines array
+        routeMapPolylines.add(routeMapPolyline);
+
+        // add route info into text field
+        routeTextView.append("You will arrive at your destination in " + route.getDurationInSeconds() + " seconds.\n");
+        routeTextView.append("Currently " + route.getTrafficDelayInSeconds() + " seconds slow due to traffic jam.\n");
+        routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
+
+        // adjust view camera to match the whole  route
+        routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        mapView.getCamera().lookAt(route.getBoundingBox(), routecameraOrientation);
+
+    }
+
+    private void drawRoutePedestrian(Route route) {
+        GeoPolyline routeGeoPolyline;
+
+        try {
+            routeGeoPolyline = new GeoPolyline(route.getPolyline());
+        }catch (InstantiationErrorException e) {
+            // need to return because of the route must have more than two points
+            return ;
+        }
+
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 25, new Color((short) 0x00,(short) 0x00,(short) 0x8A,(short) 0xAA));
+
+        mapView.getMapScene().addMapPolyline(routeMapPolyline);
+
+        // add routeMapPolyline to routeMapPolylines array
+        routeMapPolylines.add(routeMapPolyline);
+
+        // add route info into text field
+        routeTextView.append("You will arrive at your destination in " + route.getDurationInSeconds() + " seconds.\n");
+        routeTextView.append("Currently " + route.getTrafficDelayInSeconds() + " seconds slow due to traffic jam.\n");
+        routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
+
+        // adjust view camera to match the whole  route
+        routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        mapView.getCamera().lookAt(route.getBoundingBox(), routecameraOrientation);
+
+    }
+
+    public void clearMap(View view) {
+        for (MapMarker marker : waypointMarkers) {
+            mapView.getMapScene().removeMapMarker(marker);
+        }
+        for (MapPolyline polyline : routeMapPolylines) {
+            mapView.getMapScene().removeMapPolyline(polyline);
+        }
+
+        waypoints.clear();
+    }
+
+    private void setLongPressGestureHandler () {
+        mapView.getGestures().setLongPressListener(((gestureState, touchPoint) -> {
+            if (gestureState == GestureState.BEGIN) {
+                //SOMETHING happen as below Marker ADD
+                // define marker image from drawable folder
+                MapImage waypointImage = MapImageFactory.fromResource(context.getResources(), R.drawable.poi);
+                // Add Market by pixels location by viewToGeoCoordinates method
+                MapMarker waypointMarker = new MapMarker (mapView.viewToGeoCoordinates(touchPoint),waypointImage);
+                mapView.getMapScene().addMapMarker(waypointMarker);
+
+                // add markers to marker array list
+                waypointMarkers.add(waypointMarker);
+
+                // add touchPoint to waypoints array list
+                waypoints.add(new Waypoint(mapView.viewToGeoCoordinates(touchPoint)));
+            }
+        }));
     }
 
     public GeoCoordinates getScreenCenter() {
