@@ -129,6 +129,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="#A4C3FF"
+            android:onClick="searchPlacesCategory"
+            android:text="Places Cat" />
+
+        <Button
+            style="@android:style/Widget.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:backgroundTint="#DB5F5F"
             android:onClick="searchAddress"
             android:text="Address" />
@@ -161,7 +170,7 @@
             <ListView
                 android:id="@+id/suggestionListView"
                 android:layout_width="0dp"
-                android:layout_height="20dp"
+                android:layout_height="30dp"
                 android:layout_weight="1"
                 android:background="#FFFFFF" />
         </LinearLayout>

@@ -59,6 +59,7 @@ import com.here.sdk.routing.Waypoint;
 import com.here.sdk.search.AddressQuery;
 import com.here.sdk.search.CategoryQuery;
 import com.here.sdk.search.Place;
+import com.here.sdk.search.PlaceCategory;
 import com.here.sdk.search.SearchCallback;
 import com.here.sdk.search.SearchEngine;
 import com.here.sdk.search.SearchError;
@@ -224,7 +225,8 @@ public class MainActivity extends AppCompatActivity {
             mapView.getCamera().lookAt(cameraCoordinates,cameraOrientation,distanceInMeters);
 
         }else if (cameraCounter == 1){
-            bearingInDegrees = 180;
+            bearingInDegrees = 90;
+            distanceInMeters = 5000;
             cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
             mapView.getCamera().lookAt(cameraCoordinates,cameraOrientation,distanceInMeters);
 
@@ -236,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             mapView.getCamera().lookAt(cameraCoordinates,cameraOrientation,distanceInMeters);
 
         }else if (cameraCounter == 3){
-            GeoBox cameraBox = new GeoBox(new GeoCoordinates(25.033468, 121.561614), new GeoCoordinates(25.038256, 121.570590));
+            GeoBox cameraBox = new GeoBox(new GeoCoordinates(25.01666, 121.47574), new GeoCoordinates(25.08784, 121.59968));
 
             mapView.getCamera().lookAt(cameraBox, cameraOrientation);
 
@@ -349,6 +351,46 @@ public class MainActivity extends AppCompatActivity {
                     TextView textView = new TextView(getApplicationContext());
                     textView.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
                     textView.setText(result.getTitle() + "\n" + result.getAddress().addressText);
+
+                    LinearLayout linearLayout = new LinearLayout(getApplicationContext());
+                    linearLayout.setBackgroundResource(R.color.colorPrimary);
+                    linearLayout.setPadding(10,10,10,10);
+                    linearLayout.addView(textView);
+
+                    mapView.pinView(linearLayout, result.getGeoCoordinates());
+                    //move the camera to the result location
+                    mapView.getCamera().lookAt(result.getGeoCoordinates());
+                }
+            }
+        });
+    }
+
+    public void searchPlacesCategory(View view){
+
+        List<PlaceCategory> categoryList = new ArrayList<>();
+        categoryList.add(new PlaceCategory(PlaceCategory.EAT_AND_DRINK));
+        categoryList.add(new PlaceCategory(PlaceCategory.SHOPPING_ELECTRONICS));
+        CategoryQuery categoryQuery = new CategoryQuery(categoryList, new GeoCoordinates(25.0782904,121.3884666));
+
+        int maxItems = 30;
+        SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxItems);
+
+//        //set up the search criteria
+//        int maxiItems = 10;
+//        SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxiItems);
+//
+//        //Fetch the search text from input bar and search by center of screen
+//        EditText editText = findViewById(R.id.searchText);
+//        TextQuery textQuery = new TextQuery(editText.getText().toString(), getScreenCenter());
+
+        searchEngine.search(categoryQuery, searchOptions, new SearchCallback() {
+            @Override
+            public void onSearchCompleted(@Nullable SearchError searchError, @Nullable List<Place> list) {
+                for (Place result : list) {
+
+                    TextView textView = new TextView(getApplicationContext());
+                    textView.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+                    textView.setText(result.getTitle());
 
                     LinearLayout linearLayout = new LinearLayout(getApplicationContext());
                     linearLayout.setBackgroundResource(R.color.colorPrimary);
