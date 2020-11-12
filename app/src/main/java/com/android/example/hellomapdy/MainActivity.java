@@ -58,6 +58,7 @@ import com.here.sdk.routing.RoutingError;
 import com.here.sdk.routing.Waypoint;
 import com.here.sdk.search.AddressQuery;
 import com.here.sdk.search.CategoryQuery;
+import com.here.sdk.search.Details;
 import com.here.sdk.search.Place;
 import com.here.sdk.search.PlaceCategory;
 import com.here.sdk.search.SearchCallback;
@@ -368,20 +369,14 @@ public class MainActivity extends AppCompatActivity {
     public void searchPlacesCategory(View view){
 
         List<PlaceCategory> categoryList = new ArrayList<>();
+        categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_FUELING_STATION));
         categoryList.add(new PlaceCategory(PlaceCategory.EAT_AND_DRINK));
-        categoryList.add(new PlaceCategory(PlaceCategory.SHOPPING_ELECTRONICS));
+        categoryList.add(new PlaceCategory(PlaceCategory.GOING_OUT_CINEMA));
+        categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_BANKING));
         CategoryQuery categoryQuery = new CategoryQuery(categoryList, new GeoCoordinates(25.0782904,121.3884666));
 
         int maxItems = 30;
         SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxItems);
-
-//        //set up the search criteria
-//        int maxiItems = 10;
-//        SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxiItems);
-//
-//        //Fetch the search text from input bar and search by center of screen
-//        EditText editText = findViewById(R.id.searchText);
-//        TextQuery textQuery = new TextQuery(editText.getText().toString(), getScreenCenter());
 
         searchEngine.search(categoryQuery, searchOptions, new SearchCallback() {
             @Override
@@ -390,8 +385,16 @@ public class MainActivity extends AppCompatActivity {
 
                     TextView textView = new TextView(getApplicationContext());
                     textView.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
-                    textView.setText(result.getTitle());
-
+//                    Convert Category List to String
+                    Details details = result.getDetails();
+                    String placeCategoryIds = "";
+                    for (PlaceCategory placeCategory: details.categories){
+                        placeCategoryIds = placeCategoryIds + "\n";
+                        placeCategoryIds = placeCategoryIds + placeCategory.getId();
+//                        Print the information on console log
+                        Log.i("SDK", result.getId() +" / "+ placeCategory.getId());
+                    };
+                    textView.setText(result.getTitle()+ placeCategoryIds);
                     LinearLayout linearLayout = new LinearLayout(getApplicationContext());
                     linearLayout.setBackgroundResource(R.color.colorPrimary);
                     linearLayout.setPadding(10,10,10,10);
