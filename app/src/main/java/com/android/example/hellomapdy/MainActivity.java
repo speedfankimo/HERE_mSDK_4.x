@@ -34,6 +34,7 @@ import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.gestures.GestureState;
 import com.here.sdk.gestures.TapListener;
 import com.here.sdk.mapview.MapCamera;
+import com.here.sdk.mapview.MapCameraObserver;
 import com.here.sdk.mapview.MapError;
 import com.here.sdk.mapview.MapImage;
 import com.here.sdk.mapview.MapImageFactory;
@@ -154,7 +155,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        //set up the maximum and minimum camera zoom  level
+        MapCamera camera = mapView.getCamera();
+        MapCameraObserver MapCameraObserver = new MapCameraObserver() {
+            @Override
+            public void onCameraUpdated(MapCamera.State cameraState){
+                if (cameraState.distanceToTargetInMeters >= 1000000){
+                    camera.setDistanceToTarget(1000000);
+                } else if (cameraState.distanceToTargetInMeters < 1000) {
+                    camera.setDistanceToTarget(1000);
+                }
+            }
+        };
+        camera.addObserver(MapCameraObserver);
     }
+
 
     public void changeStyle(View view) {
         // Button Click to change the map scheme
