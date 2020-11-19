@@ -90,6 +90,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="#009688"
+                android:onClick="addCircle"
+                android:text="Circle" />
+
+            <Button
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#009688"
                 android:onClick="addPin"
                 android:text="Pin" />
         </LinearLayout>
@@ -170,7 +179,7 @@
             <ListView
                 android:id="@+id/suggestionListView"
                 android:layout_width="0dp"
-                android:layout_height="30dp"
+                android:layout_height="20dp"
                 android:layout_weight="1"
                 android:background="#FFFFFF" />
         </LinearLayout>

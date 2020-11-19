@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.here.sdk.core.Anchor2D;
 import com.here.sdk.core.Color;
 import com.here.sdk.core.GeoBox;
+import com.here.sdk.core.GeoCircle;
 import com.here.sdk.core.GeoCoordinates;
 import com.here.sdk.core.GeoCorridor;
 import com.here.sdk.core.GeoPolygon;
@@ -294,6 +295,38 @@ public class MainActivity extends AppCompatActivity {
 
         //Add Polyline to the map
         mapView.getMapScene().addMapPolyline(mapPolyline);
+    }
+
+    public void addCircle (View view) {
+        float radiusInMeters = 1500;
+        float radiusInMeters1 = 1510;
+        GeoCircle geoCircle;
+        GeoCircle geoCircle1;
+        GeoPolygon geoPolygon = null;
+        GeoPolygon geoPolygon1 = null;
+        try {
+            geoCircle = new GeoCircle(new GeoCoordinates(25.08003,121.3846),radiusInMeters);
+            geoPolygon = new GeoPolygon(geoCircle) ;
+
+            geoCircle1 = new GeoCircle(new GeoCoordinates(25.08003,121.3846),radiusInMeters1);
+            geoPolygon1 = new GeoPolygon(geoCircle1) ;
+        } catch (InstantiationError e) {
+            geoCircle = null;
+        }
+
+        //Define the style of the circle
+        float widthInPixels = 30;
+        // SDK's Color Class
+        Color fillColor = new Color((short) 72, (short) 218, (short) 208, (short) 100);
+        Color lineColor = new Color((short) 0, (short) 0, (short) 8, (short) 130);
+
+        //Create MapPolyline
+        MapPolygon mapPolygon  = new MapPolygon(geoPolygon,fillColor);
+        MapPolygon mapPolygon1 = new MapPolygon(geoPolygon1,lineColor);
+
+        //Add Polyline to the map
+        mapView.getMapScene().addMapPolygon(mapPolygon);
+        mapView.getMapScene().addMapPolygon(mapPolygon1);
     }
 
     public void addPin(View view){
