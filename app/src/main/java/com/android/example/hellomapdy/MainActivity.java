@@ -32,6 +32,7 @@ import com.here.sdk.core.Metadata;
 import com.here.sdk.core.Point2D;
 import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.gestures.GestureState;
+import com.here.sdk.gestures.GestureType;
 import com.here.sdk.gestures.TapListener;
 import com.here.sdk.mapview.MapCamera;
 import com.here.sdk.mapview.MapCameraObserver;
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private double tiltInDegrees;
     private MapCamera.OrientationUpdate cameraOrientation;
     private MapCamera.OrientationUpdate routecameraOrientation;
+    private MapCamera.OrientationUpdate circlecameraOrientation;
     private double distanceInMeters;
 
     private SearchEngine searchEngine;
@@ -114,19 +116,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //Get aMapView instance from the layout
+        Log.i("TAG", "Map initialize");
         mapView =findViewById(R.id.mapview);
         routeTextView = findViewById(R.id.routeTextView);
         mapView.onCreate(savedInstanceState);
 
+
         context = getApplicationContext();
+
 
 //        //ASK FOR PERMISSION！
 //        handleAndroidPermissions();
 
         loadMapScene();
         setLongPressGestureHandler();
-
+        //PinchRotateGestureHandler();
         try{
+
             searchEngine=new SearchEngine();
         }catch (InstantiationErrorException e){
             throw new RuntimeException("oh something went wrong");
@@ -148,8 +154,14 @@ public class MainActivity extends AppCompatActivity {
         mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
+                bearingInDegrees = 0 ;
+                tiltInDegrees = 0;
+                cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
                 if (mapError == null) {
-                    mapView.getCamera().lookAt(new GeoCoordinates(25.0782, 121.3884), 10000);
+                    mapView.getCamera().lookAt(new GeoCoordinates(25.0782, 121.3884),cameraOrientation, 10000);
+                    //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
+                    //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
+                    Log.d("TAG", "Map Set location");
                 }else {
                     Log.d("TAG", "Loading map failed :map Error: "+ mapError.name());
                 }
@@ -160,8 +172,8 @@ public class MainActivity extends AppCompatActivity {
         MapCameraObserver MapCameraObserver = new MapCameraObserver() {
             @Override
             public void onCameraUpdated(MapCamera.State cameraState){
-                if (cameraState.distanceToTargetInMeters >= 1000000){
-                    camera.setDistanceToTarget(1000000);
+                if (cameraState.distanceToTargetInMeters >= 8550000){
+                    camera.setDistanceToTarget(8550000);
                 } else if (cameraState.distanceToTargetInMeters < 1000) {
                     camera.setDistanceToTarget(1000);
                 }
@@ -316,15 +328,15 @@ public class MainActivity extends AppCompatActivity {
         float radiusInMeters = 1500;
         float radiusInMeters1 = 1510;
         GeoCircle geoCircle;
-        GeoCircle geoCircle1;
+        //GeoCircle geoCircle1;
         GeoPolygon geoPolygon = null;
-        GeoPolygon geoPolygon1 = null;
+        //GeoPolygon geoPolygon1 = null;
+        GeoCoordinates geoCoordinates = new GeoCoordinates(25.08003,121.3846);
         try {
-            geoCircle = new GeoCircle(new GeoCoordinates(25.08003,121.3846),radiusInMeters);
-            geoPolygon = new GeoPolygon(geoCircle) ;
-
-            geoCircle1 = new GeoCircle(new GeoCoordinates(25.08003,121.3846),radiusInMeters1);
-            geoPolygon1 = new GeoPolygon(geoCircle1) ;
+            geoCircle = new GeoCircle(geoCoordinates,radiusInMeters);
+            geoPolygon = new GeoPolygon(geoCircle);
+            //geoCircle1 = new GeoCircle(geoCoordinates,radiusInMeters1);
+            //geoPolygon1 = new GeoPolygon(geoCircle1) ;
         } catch (InstantiationError e) {
             geoCircle = null;
         }
@@ -333,15 +345,20 @@ public class MainActivity extends AppCompatActivity {
         float widthInPixels = 30;
         // SDK's Color Class
         Color fillColor = new Color((short) 72, (short) 218, (short) 208, (short) 100);
-        Color lineColor = new Color((short) 0, (short) 0, (short) 8, (short) 130);
+        Color lineColor = new Color((short) 0, (short) 0, (short) 8, (short) 50);
 
         //Create MapPolyline
         MapPolygon mapPolygon  = new MapPolygon(geoPolygon,fillColor);
-        MapPolygon mapPolygon1 = new MapPolygon(geoPolygon1,lineColor);
+        //MapPolygon mapPolygon1 = new MapPolygon(geoPolygon1,lineColor);
 
         //Add Polyline to the map
         mapView.getMapScene().addMapPolygon(mapPolygon);
-        mapView.getMapScene().addMapPolygon(mapPolygon1);
+        //mapView.getMapScene().addMapPolygon(mapPolygon1);
+
+        // adjust view camera to match the whole  route
+        //circlecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        mapView.getCamera().lookAt(geoCoordinates,5000);
+
     }
 
     public void addPin(View view){
@@ -571,7 +588,11 @@ public class MainActivity extends AppCompatActivity {
                         if(routingError == null) {
                             // obtain the first route via get(0) instead of the alternative route
                             Route route = routes.get(0);
-                            drawRoute(route);
+                            try {
+                                drawRoute(route);
+                            } catch (InstantiationErrorException e) {
+                                e.printStackTrace();
+                            }
                         }else {
                             // check what's the error
                         }
@@ -580,27 +601,7 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    public void calculateRoutePedestrian(View view) {
-        routingEngine.calculateRoute(
-                waypoints,
-                // default car routing
-                new PedestrianOptions(),
-                new CalculateRouteCallback() {
-                    @Override
-                    public void onRouteCalculated(@Nullable RoutingError routingError, @Nullable List<Route> routes) {
-                        if(routingError == null) {
-                            // obtain the first route via get(0) instead of the alternative route
-                            Route route = routes.get(0);
-                            drawRoutePedestrian(route);
-                        }else {
-                            // check what's the error
-                        }
-                    }
-                }
-        );
-    }
-
-    private void drawRoute(Route route) {
+    private void drawRoute(Route route) throws InstantiationErrorException {
         GeoPolyline routeGeoPolyline;
 
         try {
@@ -623,7 +624,28 @@ public class MainActivity extends AppCompatActivity {
 
         // adjust view camera to match the whole  route
         routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
-        mapView.getCamera().lookAt(route.getBoundingBox(), routecameraOrientation);
+        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(1500.0,0,1500.0,0), routecameraOrientation);
+
+    }
+
+    public void calculateRoutePedestrian(View view) {
+        routingEngine.calculateRoute(
+                waypoints,
+                // default car routing
+                new PedestrianOptions(),
+                new CalculateRouteCallback() {
+                    @Override
+                    public void onRouteCalculated(@Nullable RoutingError routingError, @Nullable List<Route> routes) {
+                        if(routingError == null) {
+                            // obtain the first route via get(0) instead of the alternative route
+                            Route route = routes.get(0);
+                            drawRoutePedestrian(route);
+                        }else {
+                            // check what's the error
+                        }
+                    }
+                }
+        );
 
     }
 
@@ -684,6 +706,26 @@ public class MainActivity extends AppCompatActivity {
             }
         }));
     }
+
+//    private void PinchRotateGestureHandler() {
+//        mapView.getGestures().setPinchRotateListener(((gestureState, point2D, point2D2, d, angle) -> {
+//            if (gestureState == GestureState.BEGIN) {
+//                MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees),
+//                //SOMETHING happen as below Marker ADD
+//                // define marker image from drawable folder
+//                MapImage waypointImage = MapImageFactory.fromResource(context.getResources(), R.drawable.poi);
+//                // Add Market by pixels location by viewToGeoCoordinates method
+//                MapMarker waypointMarker = new MapMarker (mapView.viewToGeoCoordinates(touchPoint),waypointImage);
+//                mapView.getMapScene().addMapMarker(waypointMarker);
+//
+//                // add markers to marker array list
+//                waypointMarkers.add(waypointMarker);
+//
+//                // add touchPoint to waypoints array list
+//                waypoints.add(new Waypoint(mapView.viewToGeoCoordinates(touchPoint)));
+//            }
+//        }));
+//    }
 
     public GeoCoordinates getScreenCenter() {
         int screenWidthInPixels = mapView.getWidth();
