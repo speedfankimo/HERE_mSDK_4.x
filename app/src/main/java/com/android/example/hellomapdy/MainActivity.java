@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Waypoint> waypoints = new ArrayList<>();
     private List<MapMarker> waypointMarkers = new ArrayList<>();
     private List<MapPolyline> routeMapPolylines = new ArrayList<>();
+    private List<GeoCoordinates> verticeses;
 
 
     @SuppressLint("WrongViewCast")
@@ -332,12 +333,20 @@ public class MainActivity extends AppCompatActivity {
         GeoPolygon geoPolygon = null;
         //GeoPolygon geoPolygon1 = null;
         GeoCoordinates geoCoordinates = new GeoCoordinates(25.08003,121.3846);
+        GeoBox geobox;
+
         try {
             geoCircle = new GeoCircle(geoCoordinates,radiusInMeters);
             geoPolygon = new GeoPolygon(geoCircle);
+            geobox = GeoBox.containing(geoPolygon.vertices);
+            //verticeses.add(geoPolygon.vertices.get(0));
+            Log.v("vertices", String.valueOf(geobox));
+            // adjust view camera to match the whole geoPolygon
+            mapView.getCamera().lookAt(geobox.expandedBy(0,1000,0,1000),new MapCamera.OrientationUpdate(0.0,0.0));
+
             //geoCircle1 = new GeoCircle(geoCoordinates,radiusInMeters1);
             //geoPolygon1 = new GeoPolygon(geoCircle1) ;
-        } catch (InstantiationError e) {
+        } catch (InstantiationError | InstantiationErrorException e) {
             geoCircle = null;
         }
 
@@ -357,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
 
         // adjust view camera to match the whole  route
         //circlecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
-        mapView.getCamera().lookAt(geoCoordinates,5000);
+        //mapView.getCamera().lookAt(geoCoordinates,5000);
 
     }
 
