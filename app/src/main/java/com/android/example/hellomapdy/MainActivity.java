@@ -338,11 +338,24 @@ public class MainActivity extends AppCompatActivity {
         try {
             geoCircle = new GeoCircle(geoCoordinates,radiusInMeters);
             geoPolygon = new GeoPolygon(geoCircle);
+            //create the List(geoCoordinates) of vertices
             geobox = GeoBox.containing(geoPolygon.vertices);
             //verticeses.add(geoPolygon.vertices.get(0));
             Log.v("vertices", String.valueOf(geobox));
+
+            //add mapMarker on the centre of circle
+            //Create MapImage
+            MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.poi);
+            //Create Anchor (generally the anchor is placed on the middle of the image rather on buttom of image)
+            Anchor2D anchor2D = new Anchor2D(0.5f,1.0f);
+            //Create MapMaker
+            MapMarker mapMarker = new MapMarker(geoCoordinates,mapImage,anchor2D);
+            //Add the marker to map
+            mapView.getMapScene().addMapMarker(mapMarker);
+
+
             // adjust view camera to match the whole geoPolygon
-            mapView.getCamera().lookAt(geobox.expandedBy(0,1000,0,1000),new MapCamera.OrientationUpdate(0.0,0.0));
+            mapView.getCamera().lookAt(geobox.expandedBy(30,500,30,500),new MapCamera.OrientationUpdate(0.0,0.0));
 
             //geoCircle1 = new GeoCircle(geoCoordinates,radiusInMeters1);
             //geoPolygon1 = new GeoPolygon(geoCircle1) ;
