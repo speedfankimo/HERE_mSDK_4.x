@@ -75,6 +75,7 @@ import com.here.sdk.search.TextQuery;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -592,6 +593,72 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void calculateRouteTwoPoint(View view) {
+
+        RouteOptions routeOptions = new RouteOptions();
+        // how many route return
+        routeOptions.alternatives =3 ;
+        routeOptions.optimizationMode = OptimizationMode.FASTEST;
+
+        CarOptions options = new CarOptions(routeOptions, new RouteTextOptions(), new AvoidanceOptions());
+
+        Waypoint startWaypoint = new Waypoint(new GeoCoordinates(19.876254,99.712621));
+        Waypoint destinationWaypoint = new Waypoint(new GeoCoordinates(13.811173,100.569244));
+
+        List<Waypoint> routeWaypoints =
+                new ArrayList<>(Arrays.asList(startWaypoint, destinationWaypoint));
+
+        routingEngine.calculateRoute(
+                routeWaypoints,
+                options,  // or use "new CarOptions() as car default
+                new CalculateRouteCallback() {
+                    @Override
+                    public void onRouteCalculated(@Nullable RoutingError routingError, @Nullable List<Route> routes) {
+                        if(routingError == null) {
+                            // obtain the first route via get(0) instead of the alternative route
+                            Route route = routes.get(0);
+                            try {
+                                drawRouteTwoPoint(route);
+                            } catch (InstantiationErrorException e) {
+                                e.printStackTrace();
+                            }
+                        }else {
+                            // check what's the error
+                        }
+                    }
+                }
+        );
+    }
+
+    private void drawRouteTwoPoint(Route route) throws InstantiationErrorException {
+        GeoPolyline routeGeoPolyline;
+
+        try {
+            routeGeoPolyline = new GeoPolyline(route.getPolyline());
+        }catch (InstantiationErrorException e) {
+            // need to return because of the route must have more than two points
+            return ;
+        }
+
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 25, new Color((short) 0x00,(short) 0xAA,(short) 0x8A,(short) 0xAA));
+
+        mapView.getMapScene().addMapPolyline(routeMapPolyline);
+
+        // add routeMapPolyline to routeMapPolylines array
+        routeMapPolylines.add(routeMapPolyline);
+
+        // add route info into text field
+        routeTextView.append("You will arrive at your destination in " + route.getDurationInSeconds() + " seconds.\n");
+        routeTextView.append("Currently " + route.getTrafficDelayInSeconds() + " seconds slow due to traffic jam.\n");
+        routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
+
+        // adjust view camera to match the whole  route
+        routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(50000.0,50000.0,50000.0,50000), routecameraOrientation);
+
+    }
+
+
     public void calculateRoute(View view) {
 
         RouteOptions routeOptions = new RouteOptions();
@@ -600,6 +667,7 @@ public class MainActivity extends AppCompatActivity {
         routeOptions.optimizationMode = OptimizationMode.FASTEST;
 
         CarOptions options = new CarOptions(routeOptions, new RouteTextOptions(), new AvoidanceOptions());
+
 
         routingEngine.calculateRoute(
                 waypoints,
@@ -646,7 +714,7 @@ public class MainActivity extends AppCompatActivity {
 
         // adjust view camera to match the whole  route
         routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
-        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(1500.0,0,1500.0,0), routecameraOrientation);
+        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(1500.0,500,1500.0,500), routecameraOrientation);
 
     }
 
