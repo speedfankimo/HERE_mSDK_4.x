@@ -82,13 +82,15 @@ import java.util.Map;
 import static android.provider.Telephony.Mms.Part.TEXT;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity<schemeCounter> extends AppCompatActivity {
 
     private MapView mapView;
 
     private int styleCounter =0;
     private MapScheme schene = MapScheme.NORMAL_DAY;
 
+
+    private int schemeCounter = 0 ;
     private int cameraCounter = 0;
     private GeoCoordinates cameraCoordinates;
     private double bearingInDegrees;
@@ -210,12 +212,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadStyle(View view){
+        String filename = null;
+        schemeCounter++;
+        if(schemeCounter == 5) schemeCounter = 1;
+
+        if (schemeCounter == 1) filename = "preview.normal.day.json";
+        if (schemeCounter == 2) filename = "preview.normal.night.json";
+        if (schemeCounter == 3) filename = "preview.hybrid.day.json";
+        if (schemeCounter == 4) filename = "preview.hybrid.night.json";
+
         // customized map schene
-        String filename = "Berlin_Style.json";
+        String filenames= "preview.normal.day.json";
         AssetManager assetManager = this.getAssets();
 
         try{
-            InputStream inputStream = assetManager.open(filename);
+            InputStream inputStream = assetManager.open(filenames);
             byte[] bytes =new byte[0];
             bytes =new byte[inputStream.available()];
             inputStream.read(bytes);
@@ -602,8 +613,8 @@ public class MainActivity extends AppCompatActivity {
 
         CarOptions options = new CarOptions(routeOptions, new RouteTextOptions(), new AvoidanceOptions());
 
-        Waypoint startWaypoint = new Waypoint(new GeoCoordinates(19.876254,99.712621));
-        Waypoint destinationWaypoint = new Waypoint(new GeoCoordinates(13.811173,100.569244));
+        Waypoint startWaypoint = new Waypoint(new GeoCoordinates(16.56767,100.9707));
+        Waypoint destinationWaypoint = new Waypoint(new GeoCoordinates(13.73426,100.45906));
 
         List<Waypoint> routeWaypoints =
                 new ArrayList<>(Arrays.asList(startWaypoint, destinationWaypoint));
