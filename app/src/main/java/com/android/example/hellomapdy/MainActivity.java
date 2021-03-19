@@ -74,8 +74,10 @@ import com.here.sdk.search.TextQuery;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -610,6 +612,7 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
         // how many route return
         routeOptions.alternatives =3 ;
         routeOptions.optimizationMode = OptimizationMode.FASTEST;
+        routeOptions.departureTime = new Date(Date.UTC(2021, 3, 19, 1, 0, 0));
 
         CarOptions options = new CarOptions(routeOptions, new RouteTextOptions(), new AvoidanceOptions());
 
