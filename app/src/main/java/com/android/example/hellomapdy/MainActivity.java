@@ -178,11 +178,17 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
         MapCameraObserver MapCameraObserver = new MapCameraObserver() {
             @Override
             public void onCameraUpdated(MapCamera.State cameraState){
-                if (cameraState.distanceToTargetInMeters >= 8550000){
-                    camera.setDistanceToTarget(8550000);
-                } else if (cameraState.distanceToTargetInMeters < 1000) {
-                    camera.setDistanceToTarget(1000);
+                Log.v("Zoomlevel", String.valueOf(cameraState.zoomLevel));
+                if (cameraState.zoomLevel >= 22){
+                    camera.zoomTo(21);
+                } else if (cameraState.zoomLevel < 3) {
+                    camera.zoomTo(4);
                 }
+//                if (cameraState.distanceToTargetInMeters >= 8550000){
+//                    camera.setDistanceToTarget(8550000);
+//                } else if (cameraState.distanceToTargetInMeters < 1000) {
+//                    camera.setDistanceToTarget(1000);
+//                }
             }
         };
         camera.addObserver(MapCameraObserver);
@@ -294,8 +300,8 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
     public void addMarker(View view){
         //Create MapImage
         MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.waypoint);
-        //Create Anchor (generally the anchor is placed on the middle of the image rather on buttom of image)
-        Anchor2D anchor2D = new Anchor2D(0.5f,1.1f);
+        //Create Anchor (generally the anchor is placed on the middle of the image rather on bottom of image)
+        Anchor2D anchor2D = new Anchor2D(0.5f,1.0f);
 
         //add metadata
         Metadata meta = new Metadata();
@@ -612,7 +618,7 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
         // how many route return
         routeOptions.alternatives =3 ;
         routeOptions.optimizationMode = OptimizationMode.FASTEST;
-        routeOptions.departureTime = new Date(Date.UTC(2021, 3, 19, 1, 0, 0));
+        //routeOptions.departureTime = new Date(Date.UTC(2021, 3, 19, 1, 0, 0));
 
         CarOptions options = new CarOptions(routeOptions, new RouteTextOptions(), new AvoidanceOptions());
 
@@ -798,8 +804,9 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                 //SOMETHING happen as below Marker ADD
                 // define marker image from drawable folder
                 MapImage waypointImage = MapImageFactory.fromResource(context.getResources(), R.drawable.poi);
+                Anchor2D anchor2D = new Anchor2D(0.5f,1.0f);
                 // Add Market by pixels location by viewToGeoCoordinates method
-                MapMarker waypointMarker = new MapMarker (mapView.viewToGeoCoordinates(touchPoint),waypointImage);
+                MapMarker waypointMarker = new MapMarker (mapView.viewToGeoCoordinates(touchPoint),waypointImage,anchor2D);
                 mapView.getMapScene().addMapMarker(waypointMarker);
 
                 // add markers to marker array list
