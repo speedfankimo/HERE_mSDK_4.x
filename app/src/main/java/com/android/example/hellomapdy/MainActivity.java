@@ -157,6 +157,8 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
 
     private void loadMapScene() {
         //Load a schene from the HERE SDK to render the map with a map scheme
+        // Oslo map style
+        // mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
         mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
@@ -164,6 +166,8 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                 tiltInDegrees = 0;
                 cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
                 if (mapError == null) {
+                    //set up the map language rather than default language
+                    mapView.setPrimaryLanguage(LanguageCode.ZH_TW);
                     mapView.getCamera().lookAt(new GeoCoordinates(25.0782, 121.3884),cameraOrientation, 10000);
                     //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
                     //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
@@ -179,16 +183,6 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
             @Override
             public void onCameraUpdated(MapCamera.State cameraState){
                 Log.v("Zoomlevel", String.valueOf(cameraState.zoomLevel));
-                if (cameraState.zoomLevel >= 22){
-                    camera.zoomTo(21);
-                } else if (cameraState.zoomLevel < 3) {
-                    camera.zoomTo(4);
-                }
-//                if (cameraState.distanceToTargetInMeters >= 8550000){
-//                    camera.setDistanceToTarget(8550000);
-//                } else if (cameraState.distanceToTargetInMeters < 1000) {
-//                    camera.setDistanceToTarget(1000);
-//                }
             }
         };
         camera.addObserver(MapCameraObserver);
@@ -444,7 +438,7 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
 
     public void searchPlaces(View view){
         //set up the search criteria
-        int maxiItems = 10;
+        int maxiItems = 2;
         SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxiItems);
 
         //Fetch the search text from input bar and search by center of screen
