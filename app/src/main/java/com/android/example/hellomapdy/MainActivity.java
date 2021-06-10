@@ -158,8 +158,8 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
     private void loadMapScene() {
         //Load a schene from the HERE SDK to render the map with a map scheme
         // Oslo map style
-        // mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
-        mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
+         mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
+        //mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
                 bearingInDegrees = 0 ;
@@ -167,8 +167,8 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                 cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
                 if (mapError == null) {
                     //set up the map language rather than default language
-                    mapView.setPrimaryLanguage(LanguageCode.ZH_TW);
-                    mapView.getCamera().lookAt(new GeoCoordinates(25.0782, 121.3884),cameraOrientation, 10000);
+                    mapView.setPrimaryLanguage(LanguageCode.EN_US);
+                    mapView.getCamera().lookAt(new GeoCoordinates(-37.81951726161224, 145.11614423774873),cameraOrientation, 10000);
                     //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
                     //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
                     Log.d("TAG", "Map Set location");
@@ -573,7 +573,7 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
 
     public void searchAutoSuggest(View view){
         int maxiItems = 5;
-        SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxiItems);
+        SearchOptions searchOptions = new SearchOptions(LanguageCode.EN_US, maxiItems);
 
         //Fetch the search text from input bar and search by center of screen
         EditText editText = findViewById(R.id.searchText);
@@ -591,7 +591,7 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                 for (Suggestion suggestionResult : list) {
                     Place place = suggestionResult.getPlace();
                     if (place != null) {
-                        arrayList.add(place.getTitle());
+                        arrayList.add(place.getTitle()+ "\n" + place.getGeoCoordinates().latitude+ "," +place.getGeoCoordinates().longitude);
                     }else {
                         arrayList.add(suggestionResult.getTitle());
                     }

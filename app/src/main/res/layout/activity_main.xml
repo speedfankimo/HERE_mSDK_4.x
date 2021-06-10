@@ -46,7 +46,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="changeStyle"
                 android:text="Style"
-                />
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -56,7 +56,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="loadStyle"
                 android:text="Custom"
-                 />
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -66,7 +66,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="changeCamera"
                 android:text="Camera"
-                 />
+                android:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
@@ -84,7 +84,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="addMarker"
                 android:text="Marker"
-                 />
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -94,7 +94,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="addPolyline"
                 android:text="Polyline"
-                />
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -104,7 +104,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="addCircle"
                 android:text="Circle"
-                />
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -114,7 +114,7 @@
                 android:backgroundTint="#009688"
                 android:onClick="addPin"
                 android:text="Pin"
-                />
+                android:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
@@ -199,10 +199,9 @@
             <ListView
                 android:id="@+id/suggestionListView"
                 android:layout_width="0dp"
-                android:layout_height="20dp"
+                android:layout_height="176dp"
                 android:layout_weight="1"
-                android:background="#FFFFFF"
-                 />
+                android:background="#FFFFFF" />
         </LinearLayout>
 
         <LinearLayout
@@ -212,13 +211,14 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <Button
-            style="@android:style/Widget.Button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#E4EC12"
-            android:onClick="calculateRoute"
-            android:text="CarRouting" />
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#E4EC12"
+                android:onClick="calculateRoute"
+                android:text="CarRouting"
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -227,7 +227,8 @@
                 android:layout_weight="1"
                 android:backgroundTint="#03A9F4"
                 android:onClick="calculateRoutePedestrian"
-                android:text="PedRouting" />
+                android:text="PedRouting"
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -236,7 +237,8 @@
                 android:layout_weight="1"
                 android:backgroundTint="#98FB98"
                 android:onClick="calculateRouteTwoPoint"
-                android:text="GeneralRouting" />
+                android:text="GeneralRouting"
+                android:visibility="visible" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -245,7 +247,8 @@
                 android:layout_weight="1"
                 android:backgroundTint="#F09688"
                 android:onClick="clearMap"
-                android:text="Clear" />
+                android:text="Clear"
+                android:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
@@ -259,7 +262,8 @@
                 android:layout_width="0dp"
                 android:layout_height="10dp"
                 android:layout_weight="1"
-                android:background="#FFFFFF" />
+                android:background="#FFFFFF"
+                android:visibility="visible" />
         </LinearLayout>
 
     </LinearLayout>
