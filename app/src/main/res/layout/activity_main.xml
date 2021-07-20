@@ -191,7 +191,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="13dp"
             android:orientation="horizontal"
 
             app:layout_constraintTop_toTopOf="parent">
@@ -264,6 +264,34 @@
                 android:layout_weight="1"
                 android:background="#FFFFFF"
                 android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#E4EC12"
+                android:onClick="enableAllButtonClicked"
+                android:text="TrafficEnable"
+                android:visibility="gone" />
+
+            <Button
+                style="@android:style/Widget.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#03A9F4"
+                android:onClick="disableAllButtonClicked"
+                android:text="TrafficDisable"
+                android:visibility="gone" />
+
         </LinearLayout>
 
     </LinearLayout>

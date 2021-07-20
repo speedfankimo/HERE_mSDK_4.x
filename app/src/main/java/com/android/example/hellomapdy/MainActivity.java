@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.here.sdk.core.Anchor2D;
 import com.here.sdk.core.Color;
+import com.here.sdk.core.CountryCode;
 import com.here.sdk.core.GeoBox;
 import com.here.sdk.core.GeoCircle;
 import com.here.sdk.core.GeoCoordinates;
@@ -78,13 +80,14 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static android.provider.Telephony.Mms.Part.TEXT;
 
 
-public class MainActivity<schemeCounter> extends AppCompatActivity {
+public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivity {
 
     private MapView mapView;
 
@@ -158,8 +161,8 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
     private void loadMapScene() {
         //Load a schene from the HERE SDK to render the map with a map scheme
         // Oslo map style
-         mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
-        //mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
+        //mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
+        mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
                 bearingInDegrees = 0 ;
@@ -167,8 +170,9 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                 cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
                 if (mapError == null) {
                     //set up the map language rather than default language
-                    mapView.setPrimaryLanguage(LanguageCode.EN_US);
-                    mapView.getCamera().lookAt(new GeoCoordinates(-37.81951726161224, 145.11614423774873),cameraOrientation, 10000);
+                    mapView.setPrimaryLanguage(LanguageCode.ZH_TW);
+                    mapView.getCamera().lookAt(new GeoCoordinates(25.03848091670559, 121.56519828694795),cameraOrientation, 10000);
+                    //mapView.getCamera().flyTo(new GeoCoordinates(25.03848091670559, 121.56519828694795) );
                     //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
                     //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
                     Log.d("TAG", "Map Set location");
@@ -177,7 +181,22 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                 }
             }
         });
+
         //set up the maximum and minimum camera zoom  level
+        MapCamera maxcamera = mapView.getCamera();
+        MapCameraObserver maxMapCameraObserver = new MapCameraObserver() {
+            @Override
+            public void onCameraUpdated(MapCamera.State cameraState){
+                if (cameraState.distanceToTargetInMeters >= 10000000){
+                    maxcamera.setDistanceToTarget(1000000);
+                } else if (cameraState.distanceToTargetInMeters < 500) {
+                    maxcamera.setDistanceToTarget(1000);
+                }
+            }
+        };
+        maxcamera.addObserver(maxMapCameraObserver);
+
+        //show up the camera zoom level
         MapCamera camera = mapView.getCamera();
         MapCameraObserver MapCameraObserver = new MapCameraObserver() {
             @Override
@@ -443,7 +462,7 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
 
         //Fetch the search text from input bar and search by center of screen
         EditText editText = findViewById(R.id.searchText);
-        TextQuery textQuery = new TextQuery(editText.getText().toString(), getScreenCenter());
+        TextQuery textQuery = new TextQuery(editText.getText().toString(), getScreenCenter(), Collections.singletonList(CountryCode.TWN));
 
         searchEngine.search(textQuery, searchOptions, new SearchCallback() {
             @Override
@@ -467,22 +486,28 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
         });
     }
 
-    public void searchPlacesCategory(View view){
+                     public void searchPlacesCategory(View view){
 
-        List<PlaceCategory> categoryList = new ArrayList<>();
-        categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_FUELING_STATION));
-        categoryList.add(new PlaceCategory(PlaceCategory.EAT_AND_DRINK));
-        categoryList.add(new PlaceCategory(PlaceCategory.GOING_OUT_CINEMA));
-        categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_BANKING));
-        CategoryQuery categoryQuery = new CategoryQuery(categoryList, new GeoCoordinates(25.0782904,121.3884666));
+                        List<PlaceCategory> categoryList = new ArrayList<>();
+                        //categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_FUELING_STATION));
+                        //categoryList.add(new PlaceCategory(PlaceCategory.EAT_AND_DRINK));
+                        categoryList.add(new PlaceCategory(PlaceCategory.GOING_OUT_CINEMA));
+                        //categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_BANKING));
+                        CategoryQuery categoryQuery = new CategoryQuery(categoryList, new GeoCoordinates(13.134806,101.162434));
 
-        int maxItems = 30;
-        SearchOptions searchOptions = new SearchOptions(LanguageCode.ZH_TW, maxItems);
+                         for(PlaceCategory List:categoryList) {
+                             System.out.println(List.getId());
+                         }
+                         Log.i("categoryList",  (PlaceCategory.GOING_OUT_CINEMA.toString()));
+                         Log.i("categoryList", Arrays.deepToString(categoryList.toArray()));
 
-        searchEngine.search(categoryQuery, searchOptions, new SearchCallback() {
-            @Override
-            public void onSearchCompleted(@Nullable SearchError searchError, @Nullable List<Place> list) {
-                for (Place result : list) {
+                        int maxItems = 2;
+                        SearchOptions searchOptions = new SearchOptions(LanguageCode.TH_TH, maxItems);
+
+                        searchEngine.search(categoryQuery, searchOptions, new SearchCallback() {
+                            @Override
+                            public void onSearchCompleted(@Nullable SearchError searchError, @Nullable List<Place> list) {
+                                for (Place result : list) {
 
                     TextView textView = new TextView(getApplicationContext());
                     textView.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
@@ -493,9 +518,9 @@ public class MainActivity<schemeCounter> extends AppCompatActivity {
                         placeCategoryIds = placeCategoryIds + "\n";
                         placeCategoryIds = placeCategoryIds + placeCategory.getId();
 //                        Print the information on console log
-                        Log.i("SDK", result.getId() +" / "+ placeCategory.getId());
+                        Log.i("CATGORY", result.getId() +" / "+ placeCategory.getId());
                     };
-                    textView.setText(result.getTitle()+ placeCategoryIds);
+                    textView.setText(result.getTitle()+ "\n"+result.getId() + placeCategoryIds);
                     LinearLayout linearLayout = new LinearLayout(getApplicationContext());
                     linearLayout.setBackgroundResource(R.color.colorPrimary);
                     linearLayout.setPadding(10,10,10,10);
