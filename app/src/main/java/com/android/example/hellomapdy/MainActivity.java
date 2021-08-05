@@ -177,6 +177,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
                     //set up the map language rather than default language
                     mapView.setPrimaryLanguage(LanguageCode.ZH_TW);
                     mapView.getCamera().lookAt(new GeoCoordinates(25.03607018917306, 121.56845985288624),cameraOrientation, 10000);
+                    mapView.getCamera().zoomTo(13);
                     //mapView.getCamera().flyTo(new GeoCoordinates(25.03848091670559, 121.56519828694795) );
                     //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
                     //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
@@ -204,8 +205,8 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         //set up the maximum and minimum camera zoom level
         MapCamera maxcamera = mapView.getCamera();
-        maxcamera.getLimits().setMaxZoomLevel(18);
-        maxcamera.getLimits().setMinZoomLevel(1);
+        maxcamera.getLimits().setMaxZoomLevel(20);
+        maxcamera.getLimits().setMinZoomLevel(2);
 
         //show up the camera zoom level
         MapCamera camera = mapView.getCamera();
@@ -440,6 +441,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         mapView.pinView(linearLayout, new GeoCoordinates(25.07972, 121.37079));
     }
 
+    // marker gesture
     public void setTapGestureHandler(){
         mapView.getGestures().setTapListener(new TapListener() {
             @Override
@@ -698,7 +700,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         routeMapPolylines.add(routeMapPolyline);
 
         // add route info into text field
-        routeTextView.append("You will arrive at your destination in " + route.getDurationInSeconds() + " seconds.\n");
+        routeTextView.append("You will arrive at your destination in " + route.getDurationInSeconds() + " sec.\n");
         routeTextView.append("Currently " + route.getTrafficDelayInSeconds() + " seconds slow due to traffic jam.\n");
         routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
 
@@ -838,6 +840,10 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
                 // Add Market by pixels location by viewToGeoCoordinates method
                 MapMarker waypointMarker = new MapMarker (mapView.viewToGeoCoordinates(touchPoint),waypointImage,anchor2D);
                 mapView.getMapScene().addMapMarker(waypointMarker);
+
+                // the coordinate information of touch pin location
+                GeoCoordinates geoCoordinates = mapView.viewToGeoCoordinates(touchPoint);
+                Log.i("Pin coordinate", "Tap at: " + geoCoordinates.latitude + "," +geoCoordinates.longitude );
 
                 // add markers to marker array list
                 waypointMarkers.add(waypointMarker);

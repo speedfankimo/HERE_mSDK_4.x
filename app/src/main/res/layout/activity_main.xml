@@ -260,7 +260,7 @@
             <TextView
                 android:id="@+id/routeTextView"
                 android:layout_width="0dp"
-                android:layout_height="10dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:background="#FFFFFF"
                 android:visibility="visible" />
