@@ -37,6 +37,7 @@ import com.here.sdk.gestures.GestureState;
 import com.here.sdk.gestures.GestureType;
 import com.here.sdk.gestures.TapListener;
 import com.here.sdk.mapview.MapCamera;
+import com.here.sdk.mapview.MapCameraLimits;
 import com.here.sdk.mapview.MapCameraObserver;
 import com.here.sdk.mapview.MapError;
 import com.here.sdk.mapview.MapImage;
@@ -137,7 +138,11 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 //        //ASK FOR PERMISSION！
 //        handleAndroidPermissions();
 
-        loadMapScene();
+        try {
+            loadMapScene();
+        } catch (MapCameraLimits.MapCameraLimitsException e) {
+            e.printStackTrace();
+        }
         setLongPressGestureHandler();
         //PinchRotateGestureHandler();
         try{
@@ -158,7 +163,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 //
 //    }
 
-    private void loadMapScene() {
+    private void loadMapScene() throws MapCameraLimits.MapCameraLimitsException {
         //Load a schene from the HERE SDK to render the map with a map scheme
         // Oslo map style
         //mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
@@ -171,7 +176,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
                 if (mapError == null) {
                     //set up the map language rather than default language
                     mapView.setPrimaryLanguage(LanguageCode.ZH_TW);
-                    mapView.getCamera().lookAt(new GeoCoordinates(25.03848091670559, 121.56519828694795),cameraOrientation, 10000);
+                    mapView.getCamera().lookAt(new GeoCoordinates(25.03607018917306, 121.56845985288624),cameraOrientation, 10000);
                     //mapView.getCamera().flyTo(new GeoCoordinates(25.03848091670559, 121.56519828694795) );
                     //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
                     //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
@@ -182,19 +187,25 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
             }
         });
 
-        //set up the maximum and minimum camera zoom  level
+//        //set up the maximum and minimum camera zoom level (by distance)
+//        MapCamera maxcamera = mapView.getCamera();
+//        MapCameraObserver maxMapCameraObserver = new MapCameraObserver() {
+//            @Override
+//            public void onCameraUpdated(MapCamera.State cameraState){
+//                if (cameraState.distanceToTargetInMeters >= 10000000){
+//                    maxcamera.setDistanceToTarget(1000000);
+//                } else if (cameraState.distanceToTargetInMeters < 500) {
+//                    maxcamera.setDistanceToTarget(1000);
+//                }
+//            }
+//        };
+//        maxcamera.addObserver(maxMapCameraObserver);
+
+
+        //set up the maximum and minimum camera zoom level
         MapCamera maxcamera = mapView.getCamera();
-        MapCameraObserver maxMapCameraObserver = new MapCameraObserver() {
-            @Override
-            public void onCameraUpdated(MapCamera.State cameraState){
-                if (cameraState.distanceToTargetInMeters >= 10000000){
-                    maxcamera.setDistanceToTarget(1000000);
-                } else if (cameraState.distanceToTargetInMeters < 500) {
-                    maxcamera.setDistanceToTarget(1000);
-                }
-            }
-        };
-        maxcamera.addObserver(maxMapCameraObserver);
+        maxcamera.getLimits().setMaxZoomLevel(18);
+        maxcamera.getLimits().setMinZoomLevel(1);
 
         //show up the camera zoom level
         MapCamera camera = mapView.getCamera();
