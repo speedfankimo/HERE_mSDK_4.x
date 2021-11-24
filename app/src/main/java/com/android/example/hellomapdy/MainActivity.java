@@ -166,8 +166,8 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
     private void loadMapScene() throws MapCameraLimits.MapCameraLimitsException {
         //Load a schene from the HERE SDK to render the map with a map scheme
         // Oslo map style
-        //mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
-        mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
+        mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
+        //mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
                 bearingInDegrees = 0 ;
@@ -475,7 +475,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         //Fetch the search text from input bar and search by center of screen
         EditText editText = findViewById(R.id.searchText);
-        TextQuery textQuery = new TextQuery(editText.getText().toString(), getScreenCenter(), Collections.singletonList(CountryCode.TWN));
+        TextQuery textQuery = new TextQuery(editText.getText().toString(), getScreenCenter() , Collections.singletonList(CountryCode.TWN));
 
         searchEngine.search(textQuery, searchOptions, new SearchCallback() {
             @Override
@@ -490,6 +490,8 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
                     linearLayout.setBackgroundResource(R.color.colorPrimary);
                     linearLayout.setPadding(10,10,10,10);
                     linearLayout.addView(textView);
+
+                    Log.i("PlaceSearchResult",result.getTitle() + "\n" + result.getAddress().addressText +"\n" +result.getGeoCoordinates().latitude + "\n" + result.getGeoCoordinates().longitude);
 
                     mapView.pinView(linearLayout, result.getGeoCoordinates());
                     //move the camera to the result location
