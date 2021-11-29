@@ -21,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.here.sdk.core.Anchor2D;
-import com.here.sdk.core.Color;
 import com.here.sdk.core.CountryCode;
 import com.here.sdk.core.GeoBox;
 import com.here.sdk.core.GeoCircle;
@@ -32,6 +31,7 @@ import com.here.sdk.core.GeoPolyline;
 import com.here.sdk.core.LanguageCode;
 import com.here.sdk.core.Metadata;
 import com.here.sdk.core.Point2D;
+import com.here.sdk.core.Color;
 import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.gestures.GestureState;
 import com.here.sdk.gestures.GestureType;
@@ -74,6 +74,7 @@ import com.here.sdk.search.SearchOptions;
 import com.here.sdk.search.SuggestCallback;
 import com.here.sdk.search.Suggestion;
 import com.here.sdk.search.TextQuery;
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -166,8 +167,8 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
     private void loadMapScene() throws MapCameraLimits.MapCameraLimitsException {
         //Load a schene from the HERE SDK to render the map with a map scheme
         // Oslo map style
-        mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
-        //mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
+        //mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
+        mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
                 bearingInDegrees = 0 ;
@@ -227,8 +228,8 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         if (styleCounter == 0) schene = MapScheme.NORMAL_DAY;
         if (styleCounter == 1) schene = MapScheme.NORMAL_NIGHT;
-        if (styleCounter == 2) schene = MapScheme.GREY_DAY;
-        if (styleCounter == 3) schene = MapScheme.GREY_NIGHT;
+        if (styleCounter == 2) schene = MapScheme.HYBRID_DAY ;
+        if (styleCounter == 3) schene = MapScheme.HYBRID_NIGHT;
         if (styleCounter == 4) schene = MapScheme.SATELLITE;
 
         mapView.getMapScene().loadScene(schene, new MapScene.LoadSceneCallback() {
@@ -322,28 +323,49 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
     }
 
-    public void addMarker(View view){
+    public void addMarker(View view) throws InstantiationErrorException {
         //Create MapImage
-        MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.waypoint);
+        MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.poi);
         //Create Anchor (generally the anchor is placed on the middle of the image rather on bottom of image)
         Anchor2D anchor2D = new Anchor2D(0.5f,1.0f);
 
         //add metadata
         Metadata meta = new Metadata();
         meta.setString("dino","stegosaurus");
+        GeoBox geobox;
+
+        ArrayList<GeoCoordinates> markerCoordinates = new ArrayList();
+
+        markerCoordinates.add(new GeoCoordinates(25.077717,121.385880));
+        markerCoordinates.add(new GeoCoordinates(25.073217,121.385140));
+
+
+        geobox = GeoBox.containing(markerCoordinates);
+
+        for (MapMarker marker : waypointMarkers) {
+            mapView.getMapScene().removeMapMarker(marker);
+        }
 
         //Create MapMaker
-        MapMarker mapMarker = new MapMarker(new GeoCoordinates(25.077717,121.385880),mapImage,anchor2D);
-        // set up the marker have the meta information
-        mapMarker.setMetadata(meta);
-        //Add the marker to map
-        mapView.getMapScene().addMapMarker(mapMarker);
+        for (GeoCoordinates geoCoordinates : markerCoordinates){
+            MapMarker mapMarker = new MapMarker(geoCoordinates ,mapImage,anchor2D);
+            // set up the marker have the meta information
+            mapMarker.setMetadata(meta);
+            //Add the marker to map
+            mapView.getMapScene().addMapMarker(mapMarker);
+        }
+
+
+        // adjust view camera to match the whole Marker
+        mapView.getCamera().lookAt(geobox.expandedBy(30,500,30,500),new MapCamera.OrientationUpdate(0.0,0.0));
+
+
 
         setTapGestureHandler();
     }
 
     public void addPolyline(View view) {
-        //Create GeoPolyline
+        //Create GeoPolyline//
         ArrayList<GeoCoordinates> polylineCoordinates = new ArrayList();
         polylineCoordinates.add(new GeoCoordinates(25.08003, 121.3846));
         polylineCoordinates.add(new GeoCoordinates(25.08089, 121.38297));
@@ -361,8 +383,9 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         //Define the style of the polyline
         float widthInPixels = 30;
         // SDK's Color Class
-        Color lineColor = new Color((short) 72, (short) 218, (short) 208, (short) 255);
-
+        Color lineColor =  Color.valueOf(0, 0.56f, 0.54f, 0.63f);
+        // Color lineColor = new Color((short) 72, (short) 218, (short) 208, (short) 100);
+                //.valueOf(72,218,208,255);
         //Create MapPolyline
         MapPolyline mapPolyline = new MapPolyline(geoPolyline, widthInPixels, lineColor);
 
@@ -411,8 +434,8 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         //Define the style of the circle
         float widthInPixels = 30;
         // SDK's Color Class
-        Color fillColor = new Color((short) 72, (short) 218, (short) 208, (short) 100);
-        Color lineColor = new Color((short) 0, (short) 0, (short) 8, (short) 50);
+        Color fillColor =  Color.valueOf(0.72f,0.20f,0.56f,0.70f);
+        Color lineColor =  Color.valueOf(0, 0.56f, 0.54f, 0.63f);
 
         //Create MapPolyline
         MapPolygon mapPolygon  = new MapPolygon(geoPolygon,fillColor);
@@ -694,7 +717,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
             return ;
         }
 
-        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 25, new Color((short) 0x00,(short) 0xAA,(short) 0x8A,(short) 0xAA));
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 25, Color.valueOf(0.2f, 0.16f, 0.54f, 0.63f));
 
         mapView.getMapScene().addMapPolyline(routeMapPolyline);
 
@@ -754,7 +777,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
             // need to return because of the route must have more than two points
             return ;
         }
-        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 20, new Color((short) 0x00,(short) 0x90,(short) 0x8A,(short) 0xA0));
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 20, Color.valueOf(0.33f, 0.56f, 0.64f, 0.43f));
 
         mapView.getMapScene().addMapPolyline(routeMapPolyline);
 
@@ -803,7 +826,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
             return ;
         }
 
-        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 25, new Color((short) 0x00,(short) 0x00,(short) 0x8A,(short) 0xAA));
+        MapPolyline routeMapPolyline = new MapPolyline(routeGeoPolyline, 25, Color.valueOf(0, 0.56f, 0.54f, 0.63f));
 
         mapView.getMapScene().addMapPolyline(routeMapPolyline);
 
