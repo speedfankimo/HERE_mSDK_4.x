@@ -325,7 +325,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
     public void addMarker(View view) throws InstantiationErrorException {
         //Create MapImage
-        MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.poi);
+        MapImage mapImage = MapImageFactory.fromResource(this.getResources(), R.drawable.map_marker);
         //Create Anchor (generally the anchor is placed on the middle of the image rather on bottom of image)
         Anchor2D anchor2D = new Anchor2D(0.5f,1.0f);
 
@@ -342,9 +342,6 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         geobox = GeoBox.containing(markerCoordinates);
 
-        for (MapMarker marker : waypointMarkers) {
-            mapView.getMapScene().removeMapMarker(marker);
-        }
 
         //Create MapMaker
         for (GeoCoordinates geoCoordinates : markerCoordinates){
@@ -462,10 +459,13 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         linearLayout.addView(textView);
 
         mapView.pinView(linearLayout, new GeoCoordinates(25.07972, 121.37079));
+
+        mapView.getCamera().flyTo(new GeoCoordinates(25.07972, 121.37079));
     }
 
     // marker gesture
     public void setTapGestureHandler(){
+
         mapView.getGestures().setTapListener(new TapListener() {
             @Override
             public void onTap(Point2D touchPoint) {
@@ -791,7 +791,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         // adjust view camera to match the whole  route
         routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
-        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(1500.0,500,1500.0,500), routecameraOrientation);
+        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(300.0,300,300.0,300), routecameraOrientation);
 
     }
 
@@ -806,7 +806,11 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
                         if(routingError == null) {
                             // obtain the first route via get(0) instead of the alternative route
                             Route route = routes.get(0);
-                            drawRoutePedestrian(route);
+                            try {
+                                drawRoutePedestrian(route);
+                            } catch (InstantiationErrorException e) {
+                                e.printStackTrace();
+                            }
                         }else {
                             // check what's the error
                         }
@@ -816,7 +820,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
     }
 
-    private void drawRoutePedestrian(Route route) {
+    private void drawRoutePedestrian(Route route) throws InstantiationErrorException {
         GeoPolyline routeGeoPolyline;
 
         try {
@@ -840,7 +844,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         // adjust view camera to match the whole  route
         routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
-        mapView.getCamera().lookAt(route.getBoundingBox(), routecameraOrientation);
+        mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(300.0,300,300.0,300), routecameraOrientation);
 
     }
 
@@ -860,7 +864,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
             if (gestureState == GestureState.BEGIN) {
                 //SOMETHING happen as below Marker ADD
                 // define marker image from drawable folder
-                MapImage waypointImage = MapImageFactory.fromResource(context.getResources(), R.drawable.poi);
+                MapImage waypointImage = MapImageFactory.fromResource(context.getResources(), R.drawable.placeholder);
                 Anchor2D anchor2D = new Anchor2D(0.5f,1.0f);
                 // Add Market by pixels location by viewToGeoCoordinates method
                 MapMarker waypointMarker = new MapMarker (mapView.viewToGeoCoordinates(touchPoint),waypointImage,anchor2D);

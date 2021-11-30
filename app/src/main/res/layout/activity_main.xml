@@ -5,23 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#4A88BA"
-    android:backgroundTint="#911010"
+    android:backgroundTint="#F44336"
     android:visibility="visible"
     tools:context=".MainActivity">
 
     //Create a frame for map schene function
 
-    <com.here.sdk.mapview.MapView
-        android:id="@+id/mapview"
-        android:layout_width="390dp"
-        android:layout_height="match_parent"
-        android:background="#00BFFF"
-        android:backgroundTint="#BA5535"
-        android:visibility="visible"
-        tools:layout_editor_absoluteX="5dp"
-        tools:layout_editor_absoluteY="0dp"></com.here.sdk.mapview.MapView>
-
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -145,8 +136,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#A4C3FF"
                 android:onClick="searchPlaces"
-                android:text="Places"
-                />
+                android:text="Places" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -155,8 +145,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#A4C3FF"
                 android:onClick="searchPlacesCategory"
-                android:text="Places Cat"
-                />
+                android:text="Places Cat" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -165,8 +154,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#DB5F5F"
                 android:onClick="searchAddress"
-                android:text="Address"
-                 />
+                android:text="Address" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -175,8 +163,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#DB5F5F"
                 android:onClick="searchRevAddress"
-                android:text="RevAddress"
-                 />
+                android:text="RevAddress" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -185,8 +172,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#009688"
                 android:onClick="searchAutoSuggest"
-                android:text="Suggest"
-                />
+                android:text="Suggest" />
         </LinearLayout>
 
         <LinearLayout
@@ -199,7 +185,7 @@
             <ListView
                 android:id="@+id/suggestionListView"
                 android:layout_width="0dp"
-                android:layout_height="176dp"
+                android:layout_height="127dp"
                 android:layout_weight="1"
                 android:background="#FFFFFF" />
         </LinearLayout>
@@ -260,7 +246,7 @@
             <TextView
                 android:id="@+id/routeTextView"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#FFFFFF"
                 android:visibility="visible" />
@@ -296,7 +282,19 @@
 
     </LinearLayout>
 
-
+    <com.here.sdk.mapview.MapView
+        android:id="@+id/mapview"
+        android:layout_width="407dp"
+        android:layout_height="339dp"
+        android:background="#00BFFF"
+        android:backgroundTint="#F44336"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.703"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="1.0"></com.here.sdk.mapview.MapView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
