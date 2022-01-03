@@ -1,18 +1,16 @@
 package com.android.example.hellomapdy;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -20,12 +18,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.here.sdk.core.Anchor2D;
 import com.here.sdk.core.CountryCode;
 import com.here.sdk.core.GeoBox;
 import com.here.sdk.core.GeoCircle;
 import com.here.sdk.core.GeoCoordinates;
-import com.here.sdk.core.GeoCorridor;
+import com.here.sdk.core.GeoOrientationUpdate;
 import com.here.sdk.core.GeoPolygon;
 import com.here.sdk.core.GeoPolyline;
 import com.here.sdk.core.LanguageCode;
@@ -34,7 +33,6 @@ import com.here.sdk.core.Point2D;
 import com.here.sdk.core.Color;
 import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.gestures.GestureState;
-import com.here.sdk.gestures.GestureType;
 import com.here.sdk.gestures.TapListener;
 import com.here.sdk.mapview.MapCamera;
 import com.here.sdk.mapview.MapCameraLimits;
@@ -45,15 +43,17 @@ import com.here.sdk.mapview.MapImageFactory;
 import com.here.sdk.mapview.MapMarker;
 import com.here.sdk.mapview.MapPolygon;
 import com.here.sdk.mapview.MapPolyline;
+import com.here.sdk.mapview.MapProjection;
 import com.here.sdk.mapview.MapScene;
 import com.here.sdk.mapview.MapScheme;
 import com.here.sdk.mapview.MapView;
 import com.here.sdk.mapview.MapViewBase;
+import com.here.sdk.mapview.MapViewOptions;
 import com.here.sdk.mapview.PickMapItemsResult;
+import com.here.sdk.mapview.WatermarkStyle;
 import com.here.sdk.routing.AvoidanceOptions;
 import com.here.sdk.routing.CalculateRouteCallback;
 import com.here.sdk.routing.CarOptions;
-import com.here.sdk.routing.HazardousGood;
 import com.here.sdk.routing.OptimizationMode;
 import com.here.sdk.routing.PedestrianOptions;
 import com.here.sdk.routing.Route;
@@ -78,15 +78,10 @@ import com.here.sdk.search.TextQuery;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
-import static android.provider.Telephony.Mms.Part.TEXT;
 
 
 public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivity {
@@ -102,9 +97,9 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
     private GeoCoordinates cameraCoordinates;
     private double bearingInDegrees;
     private double tiltInDegrees;
-    private MapCamera.OrientationUpdate cameraOrientation;
-    private MapCamera.OrientationUpdate routecameraOrientation;
-    private MapCamera.OrientationUpdate circlecameraOrientation;
+    private GeoOrientationUpdate cameraOrientation;
+    private GeoOrientationUpdate routecameraOrientation;
+    private GeoOrientationUpdate circlecameraOrientation;
     private double distanceInMeters;
 
     private SearchEngine searchEngine;
@@ -128,15 +123,24 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         //Get aMapView instance from the layout
         Log.i("TAG", "Map initialize");
-        mapView =findViewById(R.id.mapview);
-        routeTextView = findViewById(R.id.routeTextView);
-        mapView.onCreate(savedInstanceState);
+        mapView = findViewById(R.id.mapview);
 
+        routeTextView = findViewById(R.id.routeTextView);
+
+//        MapViewOptions mapViewOptions = new MapViewOptions(MapProjection.WEB_MERCATOR);
+//        mapView = new MapView(this, mapViewOptions);
+//        mapView.setLayoutParams(new ViewGroup.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,ConstraintLayout.LayoutParams.MATCH_PARENT));
+//        mapView.setElevation(0);
+//        ConstraintLayout rootLayout = findViewById(R.id.root);
+//        rootLayout.addView(mapView);
+
+        mapView.onCreate(savedInstanceState);
 
         context = getApplicationContext();
 
 
 //        //ASK FOR PERMISSION！
+
 //        handleAndroidPermissions();
 
         try {
@@ -168,17 +172,21 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         //Load a schene from the HERE SDK to render the map with a map scheme
         // Oslo map style
         //mapView.getMapScene().loadScene("preview.normal.day.json", new MapScene.LoadSceneCallback() {
-        mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY, new MapScene.LoadSceneCallback() {
+        mapView.getMapScene().loadScene(MapScheme.NORMAL_DAY ,new MapScene.LoadSceneCallback() {
+
             @Override
             public void onLoadScene(@Nullable MapError mapError) {
                 bearingInDegrees = 0 ;
                 tiltInDegrees = 0;
-                cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
+                cameraOrientation = new GeoOrientationUpdate(bearingInDegrees,tiltInDegrees);
                 if (mapError == null) {
                     //set up the map language rather than default language
                     mapView.setPrimaryLanguage(LanguageCode.ZH_TW);
-                    mapView.getCamera().lookAt(new GeoCoordinates(25.03607018917306, 121.56845985288624),cameraOrientation, 10000);
-                    mapView.getCamera().zoomTo(13);
+                    mapView.getMapScene().setLayerState(MapScene.Layers.TRAFFIC_FLOW, MapScene.LayerState.VISIBLE);
+                    mapView.getMapScene().setLayerState(MapScene.Layers.TRAFFIC_INCIDENTS, MapScene.LayerState.VISIBLE);
+                    mapView.getMapScene().setLayerState(MapScene.Layers.SAFETY_CAMERAS, MapScene.LayerState.VISIBLE);
+                    mapView.getCamera().lookAt(new GeoCoordinates(25.03607018, 121.56845985),cameraOrientation, 1000);
+                    mapView.getCamera().zoomTo(15);
                     //mapView.getCamera().flyTo(new GeoCoordinates(25.03848091670559, 121.56519828694795) );
                     //mapView.getGestures().disableDefaultAction(GestureType.TWO_FINGER_PAN);
                     //mapView.getGestures().disableDefaultAction(GestureType.PINCH_ROTATE);
@@ -219,6 +227,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         };
         camera.addObserver(MapCameraObserver);
     }
+
 
 
     public void changeStyle(View view) {
@@ -293,7 +302,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         cameraCoordinates = new GeoCoordinates(25.0568438,121.580323);
         bearingInDegrees = 0 ;
         tiltInDegrees = 0;
-        cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
+        cameraOrientation = new GeoOrientationUpdate(bearingInDegrees,tiltInDegrees);
         distanceInMeters = 10000;
 
         if(cameraCounter == 0) {
@@ -303,14 +312,14 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         }else if (cameraCounter == 1){
             bearingInDegrees = 90;
             distanceInMeters = 5000;
-            cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
+            cameraOrientation = new GeoOrientationUpdate(bearingInDegrees,tiltInDegrees);
             mapView.getCamera().lookAt(cameraCoordinates,cameraOrientation,distanceInMeters);
 
         }else if (cameraCounter == 2){
             bearingInDegrees = 180;
             tiltInDegrees = 70;
             distanceInMeters = 5000;
-            cameraOrientation = new MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees);
+            cameraOrientation = new GeoOrientationUpdate(bearingInDegrees,tiltInDegrees);
             mapView.getCamera().lookAt(cameraCoordinates,cameraOrientation,distanceInMeters);
 
         }else if (cameraCounter == 3){
@@ -354,7 +363,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
 
         // adjust view camera to match the whole Marker
-        mapView.getCamera().lookAt(geobox.expandedBy(30,500,30,500),new MapCamera.OrientationUpdate(0.0,0.0));
+        mapView.getCamera().lookAt(geobox.expandedBy(30,500,30,500),new GeoOrientationUpdate(0.0,0.0));
 
 
 
@@ -420,7 +429,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
 
             // adjust view camera to match the whole geoPolygon
-            mapView.getCamera().lookAt(geobox.expandedBy(30,500,30,500),new MapCamera.OrientationUpdate(0.0,0.0));
+            mapView.getCamera().lookAt(geobox.expandedBy(30,500,30,500),new GeoOrientationUpdate(0.0,0.0));
 
             //geoCircle1 = new GeoCircle(geoCoordinates,radiusInMeters1);
             //geoPolygon1 = new GeoPolygon(geoCircle1) ;
@@ -443,7 +452,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         //mapView.getMapScene().addMapPolygon(mapPolygon1);
 
         // adjust view camera to match the whole  route
-        //circlecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        //circlecameraOrientation = new GeoOrientationUpdate(0.0,0.0);
         //mapView.getCamera().lookAt(geoCoordinates,5000);
 
     }
@@ -730,7 +739,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
 
         // adjust view camera to match the whole  route
-        routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        routecameraOrientation = new GeoOrientationUpdate(0.0,0.0);
         mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(50000.0,50000.0,50000.0,50000), routecameraOrientation);
 
     }
@@ -790,7 +799,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
 
         // adjust view camera to match the whole  route
-        routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        routecameraOrientation = new GeoOrientationUpdate(0.0,0.0);
         mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(300.0,300,300.0,300), routecameraOrientation);
 
     }
@@ -843,7 +852,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         routeTextView.append("Your destination is " + route.getLengthInMeters() + " meters away. ");
 
         // adjust view camera to match the whole  route
-        routecameraOrientation = new MapCamera.OrientationUpdate(0.0,0.0);
+        routecameraOrientation = new GeoOrientationUpdate(0.0,0.0);
         mapView.getCamera().lookAt(route.getBoundingBox().expandedBy(300.0,300,300.0,300), routecameraOrientation);
 
     }
@@ -886,7 +895,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 //    private void PinchRotateGestureHandler() {
 //        mapView.getGestures().setPinchRotateListener(((gestureState, point2D, point2D2, d, angle) -> {
 //            if (gestureState == GestureState.BEGIN) {
-//                MapCamera.OrientationUpdate(bearingInDegrees,tiltInDegrees),
+//                GeoOrientationUpdate(bearingInDegrees,tiltInDegrees),
 //                //SOMETHING happen as below Marker ADD
 //                // define marker image from drawable folder
 //                MapImage waypointImage = MapImageFactory.fromResource(context.getResources(), R.drawable.poi);
