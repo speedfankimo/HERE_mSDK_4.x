@@ -123,16 +123,19 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 
         //Get aMapView instance from the layout
         Log.i("TAG", "Map initialize");
-        mapView = findViewById(R.id.mapview);
+//        mapView = findViewById(R.id.mapview);
+//
+//        routeTextView = findViewById(R.id.routeTextView);
 
-        routeTextView = findViewById(R.id.routeTextView);
 
-//        MapViewOptions mapViewOptions = new MapViewOptions(MapProjection.WEB_MERCATOR);
-//        mapView = new MapView(this, mapViewOptions);
-//        mapView.setLayoutParams(new ViewGroup.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,ConstraintLayout.LayoutParams.MATCH_PARENT));
-//        mapView.setElevation(0);
-//        ConstraintLayout rootLayout = findViewById(R.id.root);
-//        rootLayout.addView(mapView);
+        // Flat Map / Mercator map
+        LinearLayout rootLayout = findViewById(R.id.linearLayout2);
+        MapViewOptions mapViewOptions = new MapViewOptions(MapProjection.WEB_MERCATOR);
+        mapView = new MapView(this, mapViewOptions);
+        mapView.setLayoutParams(new ViewGroup.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT));
+        mapView.setElevation(0);
+
+        rootLayout.addView(mapView);
 
         mapView.onCreate(savedInstanceState);
 
@@ -215,7 +218,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         //set up the maximum and minimum camera zoom level
         MapCamera maxcamera = mapView.getCamera();
         maxcamera.getLimits().setMaxZoomLevel(20);
-        maxcamera.getLimits().setMinZoomLevel(2);
+        maxcamera.getLimits().setMinZoomLevel(3);
 
         //show up the camera zoom level
         MapCamera camera = mapView.getCamera();
