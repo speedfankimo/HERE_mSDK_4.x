@@ -128,7 +128,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
 //        routeTextView = findViewById(R.id.routeTextView);
 
 
-        // Flat Map Mercator map
+        // Flat Map / Mercator map
         LinearLayout rootLayout = findViewById(R.id.linearLayout2);
         MapViewOptions mapViewOptions = new MapViewOptions(MapProjection.WEB_MERCATOR);
         mapView = new MapView(this, mapViewOptions);
