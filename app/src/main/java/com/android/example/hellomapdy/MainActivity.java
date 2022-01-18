@@ -218,7 +218,7 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
         //set up the maximum and minimum camera zoom level
         MapCamera maxcamera = mapView.getCamera();
         maxcamera.getLimits().setMaxZoomLevel(20);
-        maxcamera.getLimits().setMinZoomLevel(3);
+        maxcamera.getLimits().setMinZoomLevel(0);
 
         //show up the camera zoom level
         MapCamera camera = mapView.getCamera();
@@ -541,9 +541,10 @@ public class MainActivity<schemeCounter, TrafficExample> extends AppCompatActivi
                         List<PlaceCategory> categoryList = new ArrayList<>();
                         //categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_FUELING_STATION));
                         //categoryList.add(new PlaceCategory(PlaceCategory.EAT_AND_DRINK));
-                        categoryList.add(new PlaceCategory(PlaceCategory.GOING_OUT_CINEMA));
+                        //categoryList.add(new PlaceCategory(PlaceCategory.FACILITIES_HOSPITAL_HEALTHCARE));
+                        categoryList.add(new PlaceCategory("800-8700-0198")); // Public Restroom-Toilets
                         //categoryList.add(new PlaceCategory(PlaceCategory.BUSINESS_AND_SERVICES_BANKING));
-                        CategoryQuery categoryQuery = new CategoryQuery(categoryList, new GeoCoordinates(13.134806,101.162434));
+                        CategoryQuery categoryQuery = new CategoryQuery(categoryList, new GeoCoordinates(25.051413311103417, 121.55398285809909));
 
                          for(PlaceCategory List:categoryList) {
                              System.out.println(List.getId());
